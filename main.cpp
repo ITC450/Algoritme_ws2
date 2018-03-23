@@ -2,122 +2,132 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <chrono>
+#include <cstdint>
 
 using namespace std;
+const int inf = 1 << 30;
 
-int input(string text) {
+int input(string text)
+{
     int n;
+
     cout << text << endl;
     cin >> n;
-    return n;
+    return(n);
 }
 
-void setupGraph(int &edges, int nodes, vector<vector<int>> &graph){
-  edges -= nodes - 1;                     //finder overskydende edges
-  for(int i = 1; i != nodes; i++){        //opretter nodes
-    int con_node = rand()%i;              //randomizer hvilken node der connectes til
-    int weight = rand()%9+1;              //randomizer weight
-    graph[i][con_node] = weight;          //indsætter nodes
-    graph[con_node][i] = weight;
-  }
-  while(edges > 0) {                      //tilføjer overskydende edges
-    int weight = rand()%9+1;
-    int ran_node1 = rand()%nodes;     //finder random nodes, og sørger for de ikke er ens
-    int ran_node2;
-    do {
-      ran_node2 = rand()%nodes;
-    }
-    while (ran_node1 == ran_node2);
-    if(!graph[ran_node1][ran_node2]) {    //opretter edge, hvis der ikke er en
-      graph[ran_node1][ran_node2] = weight;
-      graph[ran_node2][ran_node1] = weight;
-      edges--;                            //opdaterer antal overskydende edges
-    }
-  }
-}
-
-/*
-int minDistance(int dist[], bool sptSet[])
+void setupGraph(int&edges, int nodes, vector <vector <int> >&graph)
 {
-   // Initialize min value
-   int min = INT_MAX, min_index;
-
-   for (int v = 0; v < V; v++)
-     if (sptSet[v] == false && dist[v] <= min)
-         min = dist[v], min_index = v;
-
-   return min_index;
+    edges -= nodes - 1;                    //finder overskydende edges
+    for (int i = 1; i != nodes; i++)       //opretter nodes
+    {
+        int con_node = rand() % i;          //randomizer hvilken node der connectes til
+        int weight   = rand() % 9 + 1;      //randomizer weight
+        graph[i][con_node] = weight;        //indsætter nodes
+        graph[con_node][i] = weight;
+    }
+    while (edges > 0)                      //tilføjer overskydende edges
+    {
+        int weight    = rand() % 9 + 1;
+        int ran_node1 = rand() % nodes;     //finder random nodes, og sørger for de ikke er ens
+        int ran_node2;
+        do
+        {
+            ran_node2 = rand() % nodes;
+        } while (ran_node1 == ran_node2);
+        if (graph[ran_node1][ran_node2]==inf)   //opretter edge, hvis der ikke er en
+        {
+            graph[ran_node1][ran_node2] = weight;
+            graph[ran_node2][ran_node1] = weight;
+            edges--;                         //opdaterer antal overskydende edges
+        }
+    }
 }
 
-int printSolution(int dist[], int n)
+int dijk(int A, int B, vector< vector<int> > adj) {
+    int n = adj.size();
+    vector<int> dist(n);
+    vector<bool> vis(n);
+
+    for(int i = 0; i < n; ++i) {
+        dist[i] = inf;
+    }
+    dist[A] = 0;
+
+    for(int i = 0; i < n; ++i) {
+        int cur = -1;
+        for(int j = 0; j < n; ++j) {
+            if (vis[j]) continue;
+            if (cur == -1 || dist[j] < dist[cur]) {
+                cur = j;
+            }
+        }
+
+        vis[cur] = true;
+        for(int j = 0; j < n; ++j) {
+            int path = dist[cur] + adj[cur][j];
+            if (path < dist[j]) {
+                dist[j] = path;
+            }
+        }
+    }
+
+    return dist[B];
+}
+
+
+int main()
 {
-   printf("Vertex   Distance from Source\n");
-   for (int i = 0; i < V; i++)
-      printf("%d tt %d\n", i, dist[i]);
-}
-
-int distCalc(vector<vector<int>> &graph, int src, int V){
-  int dist[V];     // The output array.  dist[i] will hold the shortest
-                   // distance from src to i
-
-  bool sptSet[V]; // sptSet[i] will true if vertex i is included in shortest
-                  // path tree or shortest distance from src to i is finalized
-
-  // Initialize all distances as INFINITE and stpSet[] as false
-  for (int i = 0; i < V; i++)
-     dist[i] = INT_MAX, sptSet[i] = false;
-
-  // Distance of source vertex from itself is always 0
-  dist[src] = 0;
-
-  // Find shortest path for all vertices
-  for (int count = 0; count < V-1; count++)
-  {
-    // Pick the minimum distance vertex from the set of vertices not
-    // yet processed. u is always equal to src in first iteration.
-    int u = minDistance(dist, sptSet);
-
-    // Mark the picked vertex as processed
-    sptSet[u] = true;
-
-    // Update dist value of the adjacent vertices of the picked vertex.
-    for (int v = 0; v < V; v++)
-
-      // Update dist[v] only if is not in sptSet, there is an edge from
-      // u to v, and total weight of path from src to  v through u is
-      // smaller than current value of dist[v]
-      if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX
-                                    && dist[u]+graph[u][v] < dist[v])
-         dist[v] = dist[u] + graph[u][v];
-  }
-
-  // print the constructed distance array
-  printSolution(dist, V);
-}
-*/
-
-int main() {
     srand(45);
     int nodes = input("Antal noder: ");
     int edges = input("Antal kanter: ");
-    if (edges<nodes-1) {
+    int dist , startpoint , endpoint;
+    if (edges < nodes - 1)
+    {
         cout << "Error! too many nodes!!! Wtf!!!" << '\n';
-        return 0;
+        return(0);
     }
 
-    if (edges>(nodes*nodes-nodes)/2) {
+    if (edges > (nodes * nodes - nodes) / 2)
+    {
         cout << "Error! too many edges!!! Wtf!!!" << '\n';
-        return 0;
+        return(0);
     }
 
-    vector<vector<int>> graph(nodes,vector<int>(nodes));
-    setupGraph(edges,nodes,graph);
-    for(auto v = 0; v != graph.size(); v++){
-        for(auto v1 = graph[v].begin(); v1 != graph[v].end(); v1++){
-            cout << *v1 << " ";
+    vector <vector <int> > graph(nodes, vector <int>(nodes, inf));
+
+    auto start = std::chrono::high_resolution_clock::now();
+    setupGraph(edges, nodes, graph);
+
+    auto end    = std::chrono::high_resolution_clock::now();
+    auto result = std::chrono::duration_cast <std::chrono::microseconds>(end - start);
+
+    for (auto v = 0; v != graph.size(); v++)
+    {
+        for (auto v1 = graph[v].begin(); v1 != graph[v].end(); v1++)
+        {
+            if(*v1==inf){
+                cout << "0" << " ";
+            }
+            else{
+                cout << *v1 << " ";
+            }
         }
         cout << "\n";
     }
-    //distCalc(vector<vector<int>> &graph, int src, int V)
-    return 0;
+
+    startpoint = input("Afstand fra punkt: ");
+    endpoint = input("Til punkt: ");
+
+    auto start2 = std::chrono::high_resolution_clock::now();
+    dist=dijk(startpoint-1,endpoint-1,graph);
+    cout << "Dist: " << dist << '\n';
+
+    auto end2    = std::chrono::high_resolution_clock::now();
+    auto result2 = std::chrono::duration_cast <std::chrono::microseconds>(end2 - start2);
+    std::cout << "Graph setup time: " << result.count() << " microseconds" << std::endl;
+    std::cout << "Search time: " << result2.count() << " microseconds" << std::endl;
+
+    return(0);
 }
